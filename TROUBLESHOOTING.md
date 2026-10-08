@@ -14,9 +14,11 @@ bugs resurface any time the compose file or volumes are touched.
 | 3 | `ls: cannot open directory '/scripts/': Permission denied` even though the mount exists | SELinux (`seclabel` in `mount` output) blocks container access to bind/volume mounts without a relabel | Add `:z` to every volume/bind mount (`./scripts:/scripts:z`, etc.) |
 | 4 | `c1`/`c2` exit silently right after `-- slurmctld is now active ...`, no error printed to `docker compose logs` | `slurmd -Z` needs to create cgroups under `/sys/fs/cgroup`, which is read-only without extra privileges | Add `privileged: true` to `slurmctld`, `c1`, `c2` |
 | 5 | After `docker compose down` + `up`, munge fails again: `munged: Error: Found pid N bound to socket "/var/run/munge/munge.socket.2"` | `docker compose down` (without `-v`) keeps named volumes; a stale munge socket file survives in the volume across container recreations | `docker compose down -v` (or `docker volume rm slurm_etc_munge slurm_etc_slurm slurm_var_log_slurm`) before `up` |
+| 6 | `c1`/`c2` still exit (code 1) right after `-- slurmctld is now active ...` even with `privileged: true` and shared volumes in place, with zero error output | The vendor `docker-entrypoint.sh` has `set -e` at the top and calls `REPLICA=$(detect_replica_number "cpu-worker")`. That function expects Compose's scaled-replica DNS names (`<project>-cpu-worker-N`); since our services are named `c1`/`c2` directly, detection always falls through to its fallback path, which does `return 1`. Under `set -e`, that failing assignment kills the whole entrypoint script immediately — before the `echo`/`slurmd` lines ever run — with no error message | Bypass the vendor's `slurmd-cpu` branch entirely: override `entrypoint`/`command` on `c1`/`c2` to run munged + the slurmctld-wait loop + `exec slurmd -Z` directly, skipping `detect_replica_number` altogether |
 
-A secondary, **cosmetic-only** quirk was also identified but not fixed (see
-[Known quirk](#known-quirk-c1c2-may-register-as-cc1cc2) below).
+A secondary, **cosmetic** quirk was also identified in the vendor script (see
+[Known quirk](#known-quirk-c1c2-may-register-as-cc1cc2) below) — it's made moot by the
+Issue 6 fix, since that fix never calls the buggy renaming logic in the first place.
 
 ## Issue 1 — Wrong role + MySQL auth failure
 
@@ -161,17 +163,71 @@ sudo pkill -9 munged
 docker compose up -d
 ```
 
-## Known quirk: c1/c2 may register as `cc1`/`cc2`
+## Issue 6 — `set -e` + buggy replica detection silently kills c1/c2
 
-Not fixed, cosmetic only. `docker-entrypoint.sh`'s `detect_replica_number()` expects
-Compose's scaled-replica DNS naming (`<project>-cpu-worker-N`) to derive a numeric
-suffix for node names (`c1`, `c2`, ...). Since this repo names the worker services
-`c1`/`c2` directly instead of a scaled `cpu-worker` service, detection fails and falls
-back to the container's own hostname (already `c1`/`c2`), so the script computes
-`NODE_NAME="c${hostname}"` → `cc1` / `cc2`. This is harmless: `slurm.conf` in this image
-uses fully dynamic nodes (`NodeSet=cpu_nodes Feature=cpu`, no static `NodeName` list),
-so whatever hostname a worker self-registers under still lands in the right partition.
-You may see `cc1`/`cc2` instead of `c1`/`c2` in `sinfo`/`squeue` output.
+**Symptom:** even after fixing issues 1–5 (explicit `command: ["slurmd-cpu"]`, shared
+volumes, `:z` flags, `privileged: true`), `c1`/`c2` still exited with code 1 right after:
+```
+c1  | -- slurmctld is now active ...
+```
+No error message at all, container just gone from `docker ps`.
+
+**Diagnosis:** ran the image manually bypassing the vendor entrypoint entirely with
+`--entrypoint /bin/bash` (see [the gotcha](#key-diagnostic-commands-reference) above),
+replicating each step of the `slurmd-cpu` branch by hand but using `REPLICA=$(hostname)`
+instead of the vendor's helper. That manual version **worked perfectly** — `slurmd`
+started, detected CPUs/GPU, and registered with `slurmctld`
+(`_handle_node_reg_resp: slurmctld sent back 8 TRES`), then sat processing
+`REQUEST_PING` RPCs in the foreground (correct behavior for `-Dvvv`, not a hang).
+
+Comparing that working manual run to the real entrypoint revealed the actual bug:
+`docker-entrypoint.sh` starts with `set -e`, and the `slurmd-cpu` branch does
+```bash
+REPLICA=$(detect_replica_number "cpu-worker")
+```
+`detect_replica_number()` looks for Docker Compose's scaled-replica DNS names
+(`${COMPOSE_PROJECT_NAME}-cpu-worker-N`). Since this repo's worker services are named
+`c1`/`c2` directly (not a scaled `cpu-worker` service), no such name ever resolves, so
+the function always falls through to its fallback branch, which does `return 1`. Under
+`set -e`, a failing command substitution assigned to a variable (`REPLICA=$(...)`)
+aborts the entire script right there — silently, with exit code 1 — before any of the
+following `echo`/`slurmd` lines ever execute. That's the exact symptom observed.
+
+**Fix:** stop relying on the vendor's `slurmd-cpu` role switch for `c1`/`c2`. Override
+the container's `entrypoint`/`command` to run the same steps directly, skipping the
+buggy `detect_replica_number` call entirely (and the hostname rename isn't needed either,
+since Compose's `hostname: c1`/`hostname: c2` already sets the right name):
+```yaml
+c1:
+  entrypoint: ["/bin/bash", "-c"]
+  command:
+    - |
+      set -e
+      echo "---> Starting the MUNGE Authentication service (munged) ..."
+      gosu munge /usr/sbin/munged
+      echo "---> Waiting for slurmctld to become active before starting slurmd..."
+      until 2>/dev/null >/dev/tcp/slurmctld/6817; do
+        echo "-- slurmctld is not available.  Sleeping ..."
+        sleep 2
+      done
+      echo "-- slurmctld is now active ..."
+      exec /usr/sbin/slurmd -Z -Dvvv --conf "Feature=cpu"
+  # same block for c2
+```
+This also fixes the cosmetic `cc1`/`cc2` naming quirk described below as a side effect,
+since the buggy renaming logic is never invoked.
+
+## Known quirk: c1/c2 may register as `cc1`/`cc2` (superseded by Issue 6 fix)
+
+This was the originally-observed cosmetic symptom of the Issue 6 bug, documented here
+for context. `detect_replica_number()`'s fallback path returns the container's own
+hostname (already `c1`/`c2`), and the script then computes `NODE_NAME="c${hostname}"` →
+`cc1` / `cc2`. This would have been harmless on its own (slurm.conf uses fully dynamic
+nodes — `NodeSet=cpu_nodes Feature=cpu`, no static `NodeName` list — so any self-registered
+hostname lands in the right partition), **but it never actually got reached**: the
+`return 1` from the same fallback path kills the script under `set -e` before the rename
+or `slurmd` start happens, which is the real Issue 6 bug above. With the Issue 6 fix in
+place, nodes register as plain `c1`/`c2`.
 
 ## Key diagnostic commands reference
 
@@ -306,7 +362,19 @@ services:
     image: giovtorres/slurm-docker-cluster:latest
     container_name: c1
     hostname: c1
-    command: ["slurmd-cpu"]
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        echo "---> Starting the MUNGE Authentication service (munged) ..."
+        gosu munge /usr/sbin/munged
+        echo "---> Waiting for slurmctld to become active before starting slurmd..."
+        until 2>/dev/null >/dev/tcp/slurmctld/6817; do
+          echo "-- slurmctld is not available.  Sleeping ..."
+          sleep 2
+        done
+        echo "-- slurmctld is now active ..."
+        exec /usr/sbin/slurmd -Z -Dvvv --conf "Feature=cpu"
     privileged: true
     volumes:
       - ./scripts:/scripts:z
@@ -320,7 +388,19 @@ services:
     image: giovtorres/slurm-docker-cluster:latest
     container_name: c2
     hostname: c2
-    command: ["slurmd-cpu"]
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        echo "---> Starting the MUNGE Authentication service (munged) ..."
+        gosu munge /usr/sbin/munged
+        echo "---> Waiting for slurmctld to become active before starting slurmd..."
+        until 2>/dev/null >/dev/tcp/slurmctld/6817; do
+          echo "-- slurmctld is not available.  Sleeping ..."
+          sleep 2
+        done
+        echo "-- slurmctld is now active ..."
+        exec /usr/sbin/slurmd -Z -Dvvv --conf "Feature=cpu"
     privileged: true
     volumes:
       - ./scripts:/scripts:z
