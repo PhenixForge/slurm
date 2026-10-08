@@ -1,6 +1,6 @@
 # Slurm Discovery
 
-## Architecture du Cluster
+## Architecture du cluster Slurm
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────┐
@@ -38,7 +38,7 @@
 │  │    │  14 CPUs        │      │              │  │  14 CPUs        │   │   │
 │  │    │  1 GPU          │      │              │  │  1 GPU          │   │   │
 │  │    │  Dynamic Reg.   │      │              │  │  Dynamic Reg.   │   │   │
-│  │    │  ✓ MUNGE + cgrs │      │              │  │ ✓ MUNGE + cgrs  │   │   │
+│  │    │ ✓ MUNGE + cgrs  │      │              │  │ ✓ MUNGE + cgrs  │   │   │
 │  │    └─────────────────┘      │              │  └─────────────────┘   │   │
 │  │                             │              │                        │   │
 │  └─────────────────────────────┘              └────────────────────────┘   │
