@@ -1,3 +1,8 @@
+volumes:
+  etc_munge:
+  etc_slurm:
+  var_log_slurm:
+
 services:
   mysql:
     image: mariadb:10.11
@@ -16,6 +21,9 @@ services:
     command: ["slurmdbd"]
     volumes:
       - ./scripts:/scripts
+      - etc_munge:/etc/munge
+      - etc_slurm:/etc/slurm
+      - var_log_slurm:/var/log/slurm
     environment:
       - SLURM_JOB_COMPLETION_LOGGING=1
       - MYSQL_USER=slurm
@@ -30,6 +38,9 @@ services:
     command: ["slurmctld"]
     volumes:
       - ./scripts:/scripts
+      - etc_munge:/etc/munge
+      - etc_slurm:/etc/slurm
+      - var_log_slurm:/var/log/slurm
     ports:
       - "6817:6817"
       - "6818:6818"
@@ -43,6 +54,9 @@ services:
     command: ["slurmd-cpu"]
     volumes:
       - ./scripts:/scripts
+      - etc_munge:/etc/munge
+      - etc_slurm:/etc/slurm
+      - var_log_slurm:/var/log/slurm
     depends_on:
       - slurmctld
 
@@ -53,5 +67,8 @@ services:
     command: ["slurmd-cpu"]
     volumes:
       - ./scripts:/scripts
+      - etc_munge:/etc/munge
+      - etc_slurm:/etc/slurm
+      - var_log_slurm:/var/log/slurm
     depends_on:
       - slurmctld
