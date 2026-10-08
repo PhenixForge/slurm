@@ -10,6 +10,7 @@ podman-compose up -d
 
 # Vérifier l'état des nœuds Slurm
 podman exec -it slurmctld sinfo
+```
 
 📜 Les 4 commandes indispensables
 Commande Rôles 
