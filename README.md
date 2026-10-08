@@ -5,6 +5,47 @@
 Ce dépôt contient la configuration et les commandes de base pour déployer un mini-cluster Slurm local avec Podman/Docker et manipuler la file d'attente.
 
 ## 🚀 Démarrage du cluster
+### version Docker
+```bash
+# Install Docker compose
+sudo dnf install -y docker-compose
+
+# Eviter les access denied
+sudo usermod -aG docker $USER
+
+# Appliquer la modification
+newgrp docker
+
+# Lancer le cluster en arrière-plan
+docker-compose up -d
+```
+
+Output :
+```
+
+```
+[+] up 16/16
+ ✔ Image mariadb:10.11 Pulled                                                                                                                                                                                                                                                                                                                                                                  4.5s
+ ✔ Container c2        Started                                                                                                                                                                                                                                                                                                                                                                 0.7s
+ ✔ Container mysql     Started                                                                                                                                                                                                                                                                                                                                                                 0.5s
+ ✔ Container c1        Started                                                                                                                                                                                                                                                                                                                                                                 0.8s
+ ✔ Container slurmdbd  Started                                                                                                                                                                                                                                                                                                                                                                 0.2s
+ ✔ Container slurmctld Started  
+
+# Vérifier l'état des nœuds Slurm
+docker ps
+```
+
+Output
+```bash
+docker ps
+CONTAINER ID   IMAGE                                    COMMAND                  CREATED          STATUS          PORTS                                                             NAMES
+4dc9890de9ad   giovtorres/slurm-docker-cluster:latest   "/usr/local/bin/dock…"   18 seconds ago   Up 18 seconds                                                                     slurmdbd
+c9c947c261d8   giovtorres/slurm-docker-cluster:latest   "/usr/local/bin/dock…"   19 seconds ago   Up 17 seconds                                                                     c1
+2dc3030d51a1   giovtorres/slurm-docker-cluster:latest   "/usr/local/bin/dock…"   19 seconds ago   Up 17 seconds                                                                     c2
+454f197f89d2   mariadb:10.11                            "docker-entrypoint.s…"   19 seconds ago   Up 18 seconds   3306/tcp                                                          mysql
+2bd22d1b3dee   giovtorres/slurm-docker-cluster:latest   "/usr/local/bin/dock…"   10 minutes ago   Up 18 seconds   0.0.0.0:6817-6818->6817-6818/tcp, [::]:6817-6818->6817-6818/tcp   slurmctld
+```
 
 ```bash
 # Lancer le cluster en arrière-plan
@@ -12,6 +53,7 @@ podman-compose up -d
 
 # Vérifier l'état des nœuds Slurm
 podman exec -it slurmctld sinfo
+
 ```
 
 ## 📜 Les 4 commandes indispensables
