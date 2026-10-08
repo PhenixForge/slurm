@@ -94,34 +94,31 @@ Résumé du travail accompli:
 
 ✅ 6 bugs identifiés et corrigés dans docker-compose.yml:
 
-Issue 1: Rôles incorrects + auth MySQL
+- Issue 1: Rôles incorrects + auth MySQL
 
-Issue 2: Volumes partagés manquants (/etc/slurm, /etc/munge)
+- Issue 2: Volumes partagés manquants (/etc/slurm, /etc/munge)
 
-Issue 3: SELinux bloquant les volumes (besoin du flag :z)
+- Issue 3: SELinux bloquant les volumes (besoin du flag :z)
 
-Issue 4: Permissions cgroup insuffisantes
+- Issue 4: Permissions cgroup insuffisantes
 
-Issue 5: Socket munge stale après docker compose down
+- Issue 5: Socket munge stale après docker compose down
 
-Issue 6: Logique de détection de replica cassée dans l'entrypoint vendor
+- Issue 6: Logique de détection de replica cassée dans l'entrypoint vendor
 
 ✅ Documentation complète via TROUBLESHOOTING.md:
 
-Tableau récapitulatif des 6 issues
-
-Explications détaillées (symptôme → diagnostic → fix)
-
-Commandes de diagnostic clés
-
-Configutation finale de docker-compose.yml
+- Tableau récapitulatif des 6 issues
+- Explications détaillées (symptôme → diagnostic → fix)
+- Commandes de diagnostic clés
+- Configutation finale de docker-compose.yml
 
 ✅ Cluster Slurm 100% fonctionnel:
 
-Tous les services up et healthy
+- Tous les services up et healthy
 
-Nœuds workers (c1, c2) enregistrés et prêts
+- Nœuds workers (c1, c2) enregistrés et prêts
 
-Jobs soumis et distribués correctement
+- Jobs soumis et distribués correctement
 
-Tracking d'exécution via sacct fonctionnel
+- Tracking d'exécution via sacct fonctionnel
