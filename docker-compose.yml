@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  slurmctld:
+    image: giovtorres/slurm-docker-cluster:latest
+    container_name: slurmctld
+    hostname: slurmctld
+    volumes:
+      - ./scripts:/scripts
+    ports:
+      - "6817:6817"
+      - "6818:6818"
+
+  c1:
+    image: giovtorres/slurm-docker-cluster:latest
+    container_name: c1
+    hostname: c1
+    links:
+      - slurmctld
+
+  c2:
+    image: giovtorres/slurm-docker-cluster:latest
+    container_name: c2
+    hostname: c2
+    links:
+      - slurmctld

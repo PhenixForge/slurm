@@ -3,6 +3,22 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# Fichiers de sorties Slurm
+*.out
+*.err
+result_*.log
+slurm-*.out
+
+# Python & Environnements virtuels
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Conteneurs et données temporaires
+.podman/
+*.tar
+
 # C extensions
 *.so
 
