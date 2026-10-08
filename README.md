@@ -55,3 +55,6 @@ Legend:
 
 Munge sert à créer et valider des credentials pour Slurm. Il confirme s'ils sont valide pour d'autres hôtes qui partagent la même configuration utilisateurs (et groupes). Tous les membres du cluster doivent partager la même clé cryptographique.
 
+## Tests de lab
+
+-> Voir fichiers `Day 1.md` etc.
