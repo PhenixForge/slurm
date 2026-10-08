@@ -20,10 +20,10 @@ services:
     hostname: slurmdbd
     command: ["slurmdbd"]
     volumes:
-      - ./scripts:/scripts
-      - etc_munge:/etc/munge
-      - etc_slurm:/etc/slurm
-      - var_log_slurm:/var/log/slurm
+      - ./scripts:/scripts:z
+      - etc_munge:/etc/munge:z
+      - etc_slurm:/etc/slurm:z
+      - var_log_slurm:/var/log/slurm:z
     environment:
       - SLURM_JOB_COMPLETION_LOGGING=1
       - MYSQL_USER=slurm
@@ -37,10 +37,10 @@ services:
     hostname: slurmctld
     command: ["slurmctld"]
     volumes:
-      - ./scripts:/scripts
-      - etc_munge:/etc/munge
-      - etc_slurm:/etc/slurm
-      - var_log_slurm:/var/log/slurm
+      - ./scripts:/scripts:z
+      - etc_munge:/etc/munge:z
+      - etc_slurm:/etc/slurm:z
+      - var_log_slurm:/var/log/slurm:z
     ports:
       - "6817:6817"
       - "6818:6818"
@@ -53,10 +53,10 @@ services:
     hostname: c1
     command: ["slurmd-cpu"]
     volumes:
-      - ./scripts:/scripts
-      - etc_munge:/etc/munge
-      - etc_slurm:/etc/slurm
-      - var_log_slurm:/var/log/slurm
+      - ./scripts:/scripts:z
+      - etc_munge:/etc/munge:z
+      - etc_slurm:/etc/slurm:z
+      - var_log_slurm:/var/log/slurm:z
     depends_on:
       - slurmctld
 
@@ -66,9 +66,9 @@ services:
     hostname: c2
     command: ["slurmd-cpu"]
     volumes:
-      - ./scripts:/scripts
-      - etc_munge:/etc/munge
-      - etc_slurm:/etc/slurm
-      - var_log_slurm:/var/log/slurm
+      - ./scripts:/scripts:z
+      - etc_munge:/etc/munge:z
+      - etc_slurm:/etc/slurm:z
+      - var_log_slurm:/var/log/slurm:z
     depends_on:
       - slurmctld
