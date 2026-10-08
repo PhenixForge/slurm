@@ -10,3 +10,36 @@ podman-compose up -d
 
 # Vérifier l'état des nœuds Slurm
 podman exec -it slurmctld sinfo
+
+📜 Les 4 commandes indispensables
+Commande Rôles 
+`batch <script>` : Soumettre un travail en arrière-plans
+`queue` : Afficher les travaux dans la file d'attentes
+`acct` : Consulter l'historique et le statut des travaux
+`scancel <ID>` : Annuler un travail en cours ou en attente
+
+🧪 Exercice : Lancer la charge de travailRendre le script exécutable :
+
+Bash
+
+    chmod +x scripts/test_job.sh
+
+    Soumettre 20 travaux simultanément :
+    Bash
+
+    podman exec -it slurmctld bash -c "cd /scripts && for i in {1..20}; do sbatch test_job.sh; done"
+
+    Observer la file d'attente se remplir et se vider :
+    Bash
+
+    podman exec -it slurmctld squeue
+
+    Consulter l'historique des exécutions :
+    Bash
+
+    podman exec -it slurmctld sacct --format=JobID,JobName,State,NodeList
+
+
+---
+
+As-tu réussi à lancer le conteneur et à voir les 20 travaux s'empiler dans `squeue` ?
