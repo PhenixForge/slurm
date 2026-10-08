@@ -20,7 +20,7 @@
 │  │  Database Daemon              │◄───┤  Controller Daemon             │   │
 │  │  • Accounting                 │    │  • Job Scheduling              │   │
 │  │  • Port 6819                  │    │  • Ports 6817-6818             │   │
-│  │  ✓ MUNGE auth                 │    │  ✓ MUNGE auth + Privileged    │   │
+│  │  ✓ MUNGE auth                 │    │  ✓ MUNGE auth + Privileged     │   │
 │  └───────────────────────────────┘    └────────────────────┬───────────┘   │
 │                 ▲                                          │               │
 │                 │                                          ▼               │
@@ -38,7 +38,7 @@
 │  │    │  14 CPUs        │      │              │  │  14 CPUs        │   │   │
 │  │    │  1 GPU          │      │              │  │  1 GPU          │   │   │
 │  │    │  Dynamic Reg.   │      │              │  │  Dynamic Reg.   │   │   │
-│  │    │  ✓ MUNGE + cgrs│      │              │  │  ✓ MUNGE + cgrs │   │   │
+│  │    │  ✓ MUNGE + cgrs│      │              │  │  ✓ MUNGE + cgrs  │   │   │
 │  │    └─────────────────┘      │              │  └─────────────────┘   │   │
 │  │                             │              │                        │   │
 │  └─────────────────────────────┘              └────────────────────────┘   │
