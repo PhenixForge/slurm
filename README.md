@@ -25,18 +25,19 @@ Commande  : Rôles
 `scancel <ID>` : Annuler un travail en cours ou en attente
 
 
-🧪 Exercice : Lancer la charge de travailRendre le script exécutable :
+🧪 Exercice : Lancer la charge de travail
 
-    `chmod +x scripts/test_job.sh`
+Rendre le script exécutable :
+`chmod +x scripts/test_job.sh`
 
-    Soumettre 20 travaux simultanément :
-    `podman exec -it slurmctld bash -c "cd /scripts && for i in {1..20}; do sbatch test_job.sh; done"`
+Soumettre 20 travaux simultanément :
+`podman exec -it slurmctld bash -c "cd /scripts && for i in {1..20}; do sbatch test_job.sh; done"`
 
-    Observer la file d'attente se remplir et se vider :
-    `podman exec -it slurmctld squeue`
+Observer la file d'attente se remplir et se vider :
+`podman exec -it slurmctld squeue`
 
-    Consulter l'historique des exécutions :
-    `podman exec -it slurmctld sacct --format=JobID,JobName,State,NodeList`
+Consulter l'historique des exécutions :
+`podman exec -it slurmctld sacct --format=JobID,JobName,State,NodeList`
 
 
 ---
