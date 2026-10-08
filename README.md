@@ -5,7 +5,7 @@
 Ce dépôt contient la configuration et les commandes de base pour déployer un mini-cluster Slurm local avec Podman/Docker et manipuler la file d'attente.
 
 ## 🚀 Démarrage du cluster
-### version Docker
+### Docker
 ```bash
 # Install Docker compose
 sudo dnf install -y docker-compose
