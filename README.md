@@ -1,5 +1,7 @@
 # Slurm Discovery
 
+Official link : https://slurm.schedmd.com/overview.html
+
 ## Architecture du cluster Slurm
 
 ```
