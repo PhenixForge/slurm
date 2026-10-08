@@ -39,7 +39,6 @@ Observer la file d'attente se remplir et se vider :
 Consulter l'historique des exécutions :
 `podman exec -it slurmctld sacct --format=JobID,JobName,State,NodeList`
 
-
 ---
 
 As-tu réussi à lancer le conteneur et à voir les 20 travaux s'empiler dans `squeue` ?
