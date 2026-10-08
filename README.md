@@ -13,7 +13,9 @@ podman exec -it slurmctld sinfo
 ```
 
 📜 Les 4 commandes indispensables
-Commande Rôles 
+
+Commande  : Rôles 
+
 `batch <script>` : Soumettre un travail en arrière-plans
 `queue` : Afficher les travaux dans la file d'attentes
 `acct` : Consulter l'historique et le statut des travaux
