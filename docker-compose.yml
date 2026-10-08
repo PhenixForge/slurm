@@ -36,6 +36,7 @@ services:
     container_name: slurmctld
     hostname: slurmctld
     command: ["slurmctld"]
+    privileged: true
     volumes:
       - ./scripts:/scripts:z
       - etc_munge:/etc/munge:z
@@ -52,6 +53,7 @@ services:
     container_name: c1
     hostname: c1
     command: ["slurmd-cpu"]
+    privileged: true
     volumes:
       - ./scripts:/scripts:z
       - etc_munge:/etc/munge:z
@@ -65,6 +67,7 @@ services:
     container_name: c2
     hostname: c2
     command: ["slurmd-cpu"]
+    privileged: true
     volumes:
       - ./scripts:/scripts:z
       - etc_munge:/etc/munge:z
