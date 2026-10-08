@@ -2,8 +2,9 @@ services:
   mysql:
     image: mariadb:10.11
     container_name: mysql
+    hostname: mysql
     environment:
-      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_ROOT_PASSWORD: "password"
       MYSQL_DATABASE: slurm_acct_db
       MYSQL_USER: slurm
       MYSQL_PASSWORD: password
@@ -12,8 +13,13 @@ services:
     image: giovtorres/slurm-docker-cluster:latest
     container_name: slurmdbd
     hostname: slurmdbd
+    command: ["slurmdbd"]
     volumes:
       - ./scripts:/scripts
+    environment:
+      - SLURM_JOB_COMPLETION_LOGGING=1
+      - MYSQL_USER=slurm
+      - MYSQL_PASSWORD=password
     depends_on:
       - mysql
 
@@ -21,6 +27,7 @@ services:
     image: giovtorres/slurm-docker-cluster:latest
     container_name: slurmctld
     hostname: slurmctld
+    command: ["slurmctld"]
     volumes:
       - ./scripts:/scripts
     ports:
@@ -33,6 +40,9 @@ services:
     image: giovtorres/slurm-docker-cluster:latest
     container_name: c1
     hostname: c1
+    command: ["slurmd-cpu"]
+    volumes:
+      - ./scripts:/scripts
     depends_on:
       - slurmctld
 
@@ -40,5 +50,8 @@ services:
     image: giovtorres/slurm-docker-cluster:latest
     container_name: c2
     hostname: c2
+    command: ["slurmd-cpu"]
+    volumes:
+      - ./scripts:/scripts
     depends_on:
       - slurmctld
