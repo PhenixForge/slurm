@@ -17,9 +17,13 @@ podman exec -it slurmctld sinfo
 Commande  : Rôles 
 
 `batch <script>` : Soumettre un travail en arrière-plans
+
 `queue` : Afficher les travaux dans la file d'attentes
+
 `acct` : Consulter l'historique et le statut des travaux
+
 `scancel <ID>` : Annuler un travail en cours ou en attente
+
 
 🧪 Exercice : Lancer la charge de travailRendre le script exécutable :
 
