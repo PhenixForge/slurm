@@ -1,4 +1,6 @@
-# Slurm Discovery - Jour 1 : Prise en main et cluster local
+# Slurm Discovery
+
+# Jour 1 : Prise en main et cluster local
 
 Ce dépôt contient la configuration et les commandes de base pour déployer un mini-cluster Slurm local avec Podman/Docker et manipuler la file d'attente.
 
@@ -12,7 +14,7 @@ podman-compose up -d
 podman exec -it slurmctld sinfo
 ```
 
-📜 Les 4 commandes indispensables
+## 📜 Les 4 commandes indispensables
 
 Commande  : Rôles 
 
@@ -24,8 +26,7 @@ Commande  : Rôles
 
 `scancel <ID>` : Annuler un travail en cours ou en attente
 
-
-🧪 Exercice : Lancer la charge de travail
+## 🧪 Exercice : Lancer la charge de travail
 
 Rendre le script exécutable :
 
