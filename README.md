@@ -18,24 +18,12 @@ newgrp docker
 
 # Lancer le cluster en arrière-plan
 docker-compose up -d
-```
-
-Output :
-```
-
-```
-[+] up 16/16
- ✔ Image mariadb:10.11 Pulled                                                                                                                                                                                                                                                                                                                                                                  4.5s
- ✔ Container c2        Started                                                                                                                                                                                                                                                                                                                                                                 0.7s
- ✔ Container mysql     Started                                                                                                                                                                                                                                                                                                                                                                 0.5s
- ✔ Container c1        Started                                                                                                                                                                                                                                                                                                                                                                 0.8s
- ✔ Container slurmdbd  Started                                                                                                                                                                                                                                                                                                                                                                 0.2s
- ✔ Container slurmctld Started  
 
 # Vérifier l'état des nœuds Slurm
-docker ps
-```
 
+docker ps
+
+```
 Output
 ```bash
 docker ps
@@ -47,26 +35,14 @@ c9c947c261d8   giovtorres/slurm-docker-cluster:latest   "/usr/local/bin/dock…"
 2bd22d1b3dee   giovtorres/slurm-docker-cluster:latest   "/usr/local/bin/dock…"   10 minutes ago   Up 18 seconds   0.0.0.0:6817-6818->6817-6818/tcp, [::]:6817-6818->6817-6818/tcp   slurmctld
 ```
 
-```bash
-# Lancer le cluster en arrière-plan
-podman-compose up -d
-
-# Vérifier l'état des nœuds Slurm
-podman exec -it slurmctld sinfo
-
-```
-
 ## 📜 Les 4 commandes indispensables
 
 Commande  : Rôles 
 
-`batch <script>` : Soumettre un travail en arrière-plans
-
-`queue` : Afficher les travaux dans la file d'attentes
-
-`acct` : Consulter l'historique et le statut des travaux
-
-`scancel <ID>` : Annuler un travail en cours ou en attente
+- `batch <script>` : Soumettre un travail en arrière-plans
+- `queue` : Afficher les travaux dans la file d'attentes
+- `acct` : Consulter l'historique et le statut des travaux
+- `scancel <ID>` : Annuler un travail en cours ou en attente
 
 ## 🧪 Exercice : Lancer la charge de travail
 
