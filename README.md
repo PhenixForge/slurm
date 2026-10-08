@@ -2,7 +2,58 @@
 
 # Jour 1 : Prise en main et cluster local
 
-Ce dépôt contient la configuration et les commandes de base pour déployer un mini-cluster Slurm local avec Podman/Docker et manipuler la file d'attente.
+Ce dépôt contient la configuration et les commandes de base pour déployer un mini-cluster Slurm local avec docker/Docker et manipuler la file d'attente.
+
+## Architecture du Cluster
+
+```mermaid
+graph TB
+    subgraph Network["Docker Network: slurm_default"]
+        subgraph Infra["Shared Infrastructure (Volumes)"]
+            DB[(("MySQL<br/>MariaDB 10.11<br/>Port 3306"))]
+            MUNGE["🔐 MUNGE<br/>Authentication<br/>Crypto Keys"]
+            CONFIG["⚙️ SLURM Config<br/>JWT Keys<br/>slurm.conf"]
+            LOGS["📝 Logs<br/>/var/log/slurm<br/>Audit Trail"]
+        end
+        
+        subgraph Daemons["Cluster Daemons"]
+            DBD["<b>slurmdbd</b><br/>Database Daemon<br/>Accounting<br/>Port 6819"]
+            CTL["<b>slurmctld</b><br/>Controller Daemon<br/>Job Scheduling<br/>Ports 6817-6818<br/>Privileged: cgroups"]
+        end
+        
+        subgraph Workers["Compute Nodes"]
+            C1["<b>c1 (Worker)</b><br/>slurmd Daemon<br/>14 CPUs<br/>1 GPU (RTX 4060)<br/>Dynamic Registration"]
+            C2["<b>c2 (Worker)</b><br/>slurmd Daemon<br/>14 CPUs<br/>1 GPU (RTX 4060)<br/>Dynamic Registration"]
+        end
+        
+        subgraph Scripts["Shared Scripts"]
+            SH["📂 ./scripts<br/>test_job.sh<br/>Job Submissions"]
+        end
+    end
+    
+    DB -->|queries| DBD
+    MUNGE -->|auth| DBD
+    MUNGE -->|auth| CTL
+    MUNGE -->|auth| C1
+    MUNGE -->|auth| C2
+    CONFIG -->|config| DBD
+    CONFIG -->|config| CTL
+    CONFIG -->|config| C1
+    CONFIG -->|config| C2
+    DBD -->|register| CTL
+    CTL -->|schedule| C1
+    CTL -->|schedule| C2
+    SH -->|submit jobs| CTL
+    
+    style Infra fill:#e1f5ff
+    style Daemons fill:#f3e5f5
+    style Workers fill:#e8f5e9
+    style Scripts fill:#fff9c4
+```
+
+## MUNGE
+
+Munge sert à créer et valider des credentials pour Slurm. Il confirme s'ils sont valide pour d'autres hôtes qui partagent la même configuration utilisateurs (et groupes). Tous les membres du cluster doivent partager la même clé cryptographique.
 
 ## 🚀 Démarrage du cluster
 ### Docker
@@ -36,9 +87,9 @@ d387cc7f4cc8   giovtorres/slurm-docker-cluster:latest   "/usr/local/bin/dock…"
 
 ## 📜 Les 4 commandes indispensables
 
-- `batch <script>` : Soumettre un travail en arrière-plans
-- `queue` : Afficher les travaux dans la file d'attentes
-- `acct` : Consulter l'historique et le statut des travaux
+- `sbatch <script>` : Soumettre un travail en arrière-plans
+- `squeue` : Afficher les travaux dans la file d'attentes
+- `sacct` : Consulter l'historique et le statut des travaux
 - `scancel <ID>` : Annuler un travail en cours ou en attente
 
 
@@ -50,15 +101,15 @@ d387cc7f4cc8   giovtorres/slurm-docker-cluster:latest   "/usr/local/bin/dock…"
 
 - Soumettre 20 travaux simultanément :
 
-`podman exec -it slurmctld bash -c "cd /scripts && for i in {1..20}; do sbatch test_job.sh; done"`
+`docker exec -it slurmctld bash -c "cd /scripts && for i in {1..20}; do sbatch test_job.sh; done"`
 
 - Observer la file d'attente se remplir et se vider :
 
-`podman exec -it slurmctld squeue`
+`docker exec -it slurmctld squeue`
 
 - Consulter l'historique des exécutions :
 
-`podman exec -it slurmctld sacct --format=JobID,JobName,State,NodeList`
+`docker exec -it slurmctld sacct --format=JobID,JobName,State,NodeList`
 
 ---
 
