@@ -4,7 +4,7 @@
 #SBATCH --ntasks=1
 #SBATCH --time=00:02:00
 
-echo "Job démarré sur le nœud : \$(hostname)"
-echo "ID du job : \$SLURM_JOB_ID"
+echo "Job démarré sur le nœud : $(hostname)"
+echo "ID du job : $SLURM_JOB_ID"
 sleep 30
 echo "Job terminé !"
