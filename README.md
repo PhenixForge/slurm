@@ -26,12 +26,12 @@ docker ps
 Output
 ```bash
 docker ps
-CONTAINER ID   IMAGE                                    COMMAND                  CREATED          STATUS          PORTS                                                             NAMES
-4dc9890de9ad   giovtorres/slurm-docker-cluster:latest   "/usr/local/bin/dock…"   18 seconds ago   Up 18 seconds                                                                     slurmdbd
-c9c947c261d8   giovtorres/slurm-docker-cluster:latest   "/usr/local/bin/dock…"   19 seconds ago   Up 17 seconds                                                                     c1
-2dc3030d51a1   giovtorres/slurm-docker-cluster:latest   "/usr/local/bin/dock…"   19 seconds ago   Up 17 seconds                                                                     c2
-454f197f89d2   mariadb:10.11                            "docker-entrypoint.s…"   19 seconds ago   Up 18 seconds   3306/tcp                                                          mysql
-2bd22d1b3dee   giovtorres/slurm-docker-cluster:latest   "/usr/local/bin/dock…"   10 minutes ago   Up 18 seconds   0.0.0.0:6817-6818->6817-6818/tcp, [::]:6817-6818->6817-6818/tcp   slurmctld
+CONTAINER ID   IMAGE                                    COMMAND                  CREATED         STATUS         PORTS                                                             NAMES
+3a532cc154d8   giovtorres/slurm-docker-cluster:latest   "/bin/bash -c 'set -…"   4 seconds ago   Up 3 seconds                                                                     c1
+d113018feacd   giovtorres/slurm-docker-cluster:latest   "/bin/bash -c 'set -…"   4 seconds ago   Up 3 seconds                                                                     c2
+775b1eb41c47   giovtorres/slurm-docker-cluster:latest   "/usr/local/bin/dock…"   4 seconds ago   Up 3 seconds   0.0.0.0:6817-6818->6817-6818/tcp, [::]:6817-6818->6817-6818/tcp   slurmctld
+d387cc7f4cc8   giovtorres/slurm-docker-cluster:latest   "/usr/local/bin/dock…"   4 seconds ago   Up 3 seconds                                                                     slurmdbd
+83d47fa7b5b4   mariadb:10.11                            "docker-entrypoint.s…"   4 seconds ago   Up 3 seconds   3306/tcp                                                          mysql
 ```
 
 ## 📜 Les 4 commandes indispensables
