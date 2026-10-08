@@ -20,10 +20,9 @@ newgrp docker
 docker-compose up -d
 
 # Vérifier l'état des nœuds Slurm
-
 docker ps
-
 ```
+
 Output
 ```bash
 docker ps
