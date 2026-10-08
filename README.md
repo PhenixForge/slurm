@@ -6,49 +6,53 @@ Ce dépôt contient la configuration et les commandes de base pour déployer un 
 
 ## Architecture du Cluster
 
-```mermaid
-graph TB
-    subgraph Network["Docker Network: slurm_default"]
-        subgraph Infra["Shared Infrastructure (Volumes)"]
-            DB[(("MySQL<br/>MariaDB 10.11<br/>Port 3306"))]
-            MUNGE["🔐 MUNGE<br/>Authentication<br/>Crypto Keys"]
-            CONFIG["⚙️ SLURM Config<br/>JWT Keys<br/>slurm.conf"]
-            LOGS["📝 Logs<br/>/var/log/slurm<br/>Audit Trail"]
-        end
-        
-        subgraph Daemons["Cluster Daemons"]
-            DBD["<b>slurmdbd</b><br/>Database Daemon<br/>Accounting<br/>Port 6819"]
-            CTL["<b>slurmctld</b><br/>Controller Daemon<br/>Job Scheduling<br/>Ports 6817-6818<br/>Privileged: cgroups"]
-        end
-        
-        subgraph Workers["Compute Nodes"]
-            C1["<b>c1 (Worker)</b><br/>slurmd Daemon<br/>14 CPUs<br/>1 GPU (RTX 4060)<br/>Dynamic Registration"]
-            C2["<b>c2 (Worker)</b><br/>slurmd Daemon<br/>14 CPUs<br/>1 GPU (RTX 4060)<br/>Dynamic Registration"]
-        end
-        
-        subgraph Scripts["Shared Scripts"]
-            SH["📂 ./scripts<br/>test_job.sh<br/>Job Submissions"]
-        end
-    end
-    
-    DB -->|queries| DBD
-    MUNGE -->|auth| DBD
-    MUNGE -->|auth| CTL
-    MUNGE -->|auth| C1
-    MUNGE -->|auth| C2
-    CONFIG -->|config| DBD
-    CONFIG -->|config| CTL
-    CONFIG -->|config| C1
-    CONFIG -->|config| C2
-    DBD -->|register| CTL
-    CTL -->|schedule| C1
-    CTL -->|schedule| C2
-    SH -->|submit jobs| CTL
-    
-    style Infra fill:#e1f5ff
-    style Daemons fill:#f3e5f5
-    style Workers fill:#e8f5e9
-    style Scripts fill:#fff9c4
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     Docker Network: slurm_default                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │              Shared Infrastructure (Named Volumes)                  │   │
+│  ├──────────────┬──────────────┬──────────────┬──────────────────────┤   │
+│  │  MySQL       │  🔐 MUNGE    │  ⚙️ CONFIG   │  📝 LOGS             │   │
+│  │  MariaDB     │  Crypto Keys │  JWT Keys    │  /var/log/slurm      │   │
+│  │  Port 3306   │  Shared Auth │  slurm.conf  │  Audit Trail         │   │
+│  └──────────────┴──────────────┴──────────────┴──────────────────────┘   │
+│                                                                               │
+│  ┌───────────────────────────────┐    ┌────────────────────────────────┐  │
+│  │      slurmdbd                 │    │      slurmctld                 │  │
+│  │  Database Daemon              │◄───┤  Controller Daemon             │  │
+│  │  • Accounting                 │    │  • Job Scheduling              │  │
+│  │  • Port 6819                  │    │  • Ports 6817-6818             │  │
+│  │  ✓ MUNGE auth                 │    │  ✓ MUNGE auth + Privileged    │  │
+│  └───────────────────────────────┘    └────────────────────┬───────────┘  │
+│                 ▲                                           │               │
+│                 │                                           ▼               │
+│                 │                    ┌──────────────────────────────────┐ │
+│                 │                    │    📂 Scripts Volume             │ │
+│                 │                    │    ./scripts/test_job.sh          │ │
+│                 │                    │    Job submissions                │ │
+│                 │                    └──────────────────────────────────┘ │
+│                 │                                           │               │
+│  ┌──────────────┴──────────────┐              ┌────────────┴───────────┐ │
+│  │                             │              │                        │ │
+│  │    ┌─────────────────┐      │              │  ┌─────────────────┐  │ │
+│  │    │  c1 (Worker)    │      │              │  │  c2 (Worker)    │  │ │
+│  │    │  slurmd Daemon  │      │              │  │  slurmd Daemon  │  │ │
+│  │    │  14 CPUs        │      │              │  │  14 CPUs        │  │ │
+│  │    │  1 GPU          │      │              │  │  1 GPU          │  │ │
+│  │    │  Dynamic Reg.   │      │              │  │  Dynamic Reg.   │  │ │
+│  │    │  ✓ MUNGE + cgrs │      │              │  │  ✓ MUNGE + cgrs │  │ │
+│  │    └─────────────────┘      │              │  └─────────────────┘  │ │
+│  │                             │              │                        │ │
+│  └─────────────────────────────┘              └────────────────────────┘ │
+│                                                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Legend:
+  ◄─►  = Data flows (queries, auth, config, scheduling)
+  ✓    = Security/features enabled
+  cgrs = cgroups for job resource isolation
 ```
 
 ## MUNGE
